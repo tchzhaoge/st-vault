@@ -1,0 +1,40 @@
+{
+  "name": "st-vault",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal public-live recorder and timeline browser for NAS deployments",
+  "workspaces": [
+    "apps/server",
+    "apps/ui",
+    "packages/api-schema"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @st-vault/server",
+    "dev:ui": "npm run dev --workspace @st-vault/ui",
+    "build": "node scripts/build-release.mjs",
+    "start": "node build/apps/server/src/index.js",
+    "test": "npm run test:tools && npm test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint apps/server/src apps/ui/src packages/api-schema/src",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run format:check && npm run lint && npm run check:repository && npm run typecheck && npm test && npm run build",
+    "release:up": "docker compose --env-file deploy/.env -f deploy/compose.yml pull && docker compose --env-file deploy/.env -f deploy/compose.yml up -d",
+    "repair:workspaces": "node scripts/repair-workspaces.mjs --repair",
+    "test:browser": "node scripts/run-browser-tests.mjs",
+    "test:tools": "node --test scripts/*.test.mjs",
+    "check:repository": "node scripts/check-repository.mjs"
+  },
+  "devDependencies": {
+    "eslint": "^10.14.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.72.1",
+    "prettier": "3.9.10",
+    "vite": "^8.3.5",
+    "playwright-core": "^1.64.1"
+  },
+  "engines": {
+    "node": ">=24.22.1"
+  },
+  "license": "Apache-2.0"
+}

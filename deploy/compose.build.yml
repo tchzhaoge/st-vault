@@ -1,0 +1,5 @@
+# Developer-only override; user deployments pull the published image.
+services:
+  app:
+    image: st-vault:local
+    build: { context: .., dockerfile: deploy/Dockerfile, target: runtime }

@@ -1,0 +1,27 @@
+# Dependencies and generated code
+node_modules/
+.pnpm-store/
+build/
+coverage/
+qa-artifacts/
+dist/
+*.tsbuildinfo
+# Runtime state, credentials, private archives and QA
+.local/
+.workbuddy/
+data/
+media/
+config/
+backups/
+output/
+tmp-smoke/
+.playwright*/
+.env
+.env.*
+!.env.example
+# Logs and editor files
+*.log
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,65 @@
+import { afterEach, expect, it, vi } from 'vitest';
+import { PlayerActivity } from './player-activity';
+afterEach(() => vi.useRealTimers());
+it('stays hidden until activity, then hides after one idle second', () => {
+  vi.useFakeTimers();
+  const visible = vi.fn();
+  const activity = new PlayerActivity(visible);
+  vi.advanceTimersByTime(5000);
+  expect(visible).not.toHaveBeenCalled();
+  activity.wake();
+  vi.advanceTimersByTime(800);
+  activity.wake();
+  vi.advanceTimersByTime(999);
+  expect(visible).toHaveBeenLastCalledWith(true);
+  vi.advanceTimersByTime(1);
+  expect(visible).toHaveBeenLastCalledWith(false);
+  activity.dispose();
+});
+it('hides immediately on leave and cancels deadlines on disposal', () => {
+  vi.useFakeTimers();
+  const visible = vi.fn();
+  const activity = new PlayerActivity(visible);
+  activity.wake();
+  activity.hide();
+  expect(visible).toHaveBeenLastCalledWith(false);
+  const calls = visible.mock.calls.length;
+  vi.advanceTimersByTime(5000);
+  expect(visible).toHaveBeenCalledTimes(calls);
+  activity.wake();
+  activity.dispose();
+  vi.advanceTimersByTime(5000);
+  expect(visible).toHaveBeenLastCalledWith(true);
+});
+
+it('holds visibility over interactive regions and starts a fresh idle deadline after leaving', () => {
+  vi.useFakeTimers();
+  const visible = vi.fn();
+  const activity = new PlayerActivity(visible);
+  activity.wake();
+  vi.advanceTimersByTime(500);
+  activity.setInteractive(true);
+  vi.advanceTimersByTime(5000);
+  expect(visible).toHaveBeenLastCalledWith(true);
+  activity.wake();
+  vi.advanceTimersByTime(5000);
+  expect(visible).toHaveBeenLastCalledWith(true);
+  activity.setInteractive(false);
+  vi.advanceTimersByTime(999);
+  expect(visible).toHaveBeenLastCalledWith(true);
+  vi.advanceTimersByTime(1);
+  expect(visible).toHaveBeenLastCalledWith(false);
+  activity.dispose();
+});
+it('clears a hover hold on exit so returning to the picture can hide normally', () => {
+  vi.useFakeTimers();
+  const visible = vi.fn();
+  const activity = new PlayerActivity(visible);
+  activity.setInteractive(true);
+  activity.hide();
+  expect(visible).toHaveBeenLastCalledWith(false);
+  activity.wake();
+  vi.advanceTimersByTime(1000);
+  expect(visible).toHaveBeenLastCalledWith(false);
+  activity.dispose();
+});

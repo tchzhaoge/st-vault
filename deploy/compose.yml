@@ -1,0 +1,57 @@
+name: st-vault
+x-log: &logs
+  driver: json-file
+  options: { max-size: '10m', max-file: '3' }
+services:
+  app:
+    image: ${STV_APP_IMAGE:-ghcr.io/tchzhaoge/st-vault:latest}
+    pull_policy: missing
+    user: '0:0'
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      STV_PORT: 10002
+      STV_RUNTIME_UID: ${STV_UID:-1000}
+      STV_RUNTIME_GID: ${STV_GID:-1000}
+      STV_SECURE_COOKIE: ${STV_SECURE_COOKIE:-0}
+      STV_ACCOUNT_ORIGIN: ${STV_ACCOUNT_ORIGIN:-https://stripchat.com}
+      STV_LOG_DIR: /data/logs
+      STV_LOG_MAX_MB: ${STV_LOG_MAX_MB:-10}
+      STV_LOG_FILES: ${STV_LOG_FILES:-8}
+      STV_POLL_MS: ${STV_POLL_MS:-5000}
+      STV_MIN_FREE_BYTES: ${STV_MIN_FREE_BYTES:-2147483648}
+      STV_INGRESS_MEMORY_MB: ${STV_INGRESS_MEMORY_MB:-}
+      STV_RETENTION_DAYS: ${STV_RETENTION_DAYS:-0}
+      NODE_OPTIONS: ${STV_NODE_OPTIONS:-}
+      STV_DECODE_WORKERS: ${STV_DECODE_WORKERS:-}
+      STV_IO_WORKERS: ${STV_IO_WORKERS:-}
+      STV_NETWORK_WORKERS: ${STV_NETWORK_WORKERS:-}
+    ports: ['${STV_BIND_ADDRESS:-127.0.0.1}:${STV_RELEASE_PORT:-10002}:10002']
+    volumes:
+      - ${STV_DATA_VOLUME:-../data}:/data
+      - ${STV_MEDIA_VOLUME:-../media}:/media
+    tmpfs: ['/tmp:size=256m,mode=1777']
+    read_only: true
+    cap_drop: [ALL]
+    # The supervisor and PostgreSQL run as the configured non-root identity.
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETUID, SETGID, KILL]
+    security_opt: ['no-new-privileges:true']
+    init: true
+    cpus: '${STV_APP_CPUS:-0}'
+    mem_limit: ${STV_APP_MEMORY:-8g}
+    pids_limit: 1024
+    shm_size: 128m
+    stop_grace_period: 180s
+    restart: unless-stopped
+    logging: *logs
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:10002/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s

@@ -1,0 +1,27 @@
+name: Bug report
+description: 报告可复现的问题，请勿包含凭据或私人媒体
+body:
+  - type: input
+    id: revision
+    attributes:
+      label: 提交号或镜像版本
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 部署环境
+      description: 系统、CPU 架构、Docker 和浏览器；说明是否使用代理，不填写敏感地址或账号。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤、预期与实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 脱敏证据
+      description: 时间、错误码和最小日志；不要上传 Cookies、令牌、密钥、HAR、数据库或私人录像。

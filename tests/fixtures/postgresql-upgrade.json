@@ -1,0 +1,134 @@
+{
+  "synthetic": true,
+  "manifest": {
+    "format": 1,
+    "id": "6f2fc0f1-f618-4c44-a77c-8ccd3d049fb0",
+    "createdAtMs": 1794651188566
+  },
+  "catalog": "CREATE TABLE account_preparations(generation TEXT PRIMARY KEY,subjects TEXT NOT NULL,created INTEGER NOT NULL);\nCREATE TABLE account_subjects (subject TEXT PRIMARY KEY,following INTEGER NOT NULL CHECK(following IN(0,1)));\nCREATE TABLE archive_events(id INTEGER PRIMARY KEY AUTOINCREMENT,at_ms INTEGER NOT NULL,json TEXT NOT NULL);\nCREATE TABLE counters (id INTEGER PRIMARY KEY, revision INTEGER NOT NULL);\nINSERT INTO \"counters\"(\"id\",\"revision\") VALUES(1,6);\nCREATE TABLE coverage_minutes(subject TEXT NOT NULL,minute INTEGER NOT NULL,spans TEXT NOT NULL,starts TEXT NOT NULL,ends TEXT NOT NULL,count INTEGER NOT NULL,covered_ms INTEGER NOT NULL DEFAULT 0,start_count INTEGER NOT NULL DEFAULT 0,end_count INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(subject,minute));\nINSERT INTO \"coverage_minutes\"(\"subject\",\"minute\",\"spans\",\"starts\",\"ends\",\"count\",\"covered_ms\",\"start_count\",\"end_count\") VALUES('stripchat:42',60000,'[[0,60000]]','[0,30000]','[30000,60000]',2,60000,2,2);\nINSERT INTO \"coverage_minutes\"(\"subject\",\"minute\",\"spans\",\"starts\",\"ends\",\"count\",\"covered_ms\",\"start_count\",\"end_count\") VALUES('stripchat:42',120000,'[[0,60000]]','[0,30000]','[30000,60000]',2,60000,2,2);\nINSERT INTO \"coverage_minutes\"(\"subject\",\"minute\",\"spans\",\"starts\",\"ends\",\"count\",\"covered_ms\",\"start_count\",\"end_count\") VALUES('stripchat:42',180000,'[[0,60000]]','[0,30000]','[30000,60000]',2,60000,2,2);\nCREATE TABLE deletion_growth(job TEXT PRIMARY KEY REFERENCES media_deletions(id) ON DELETE CASCADE,\n        unit TEXT NOT NULL,revision INTEGER NOT NULL,segment TEXT NOT NULL DEFAULT '');\nCREATE TABLE deletion_items(job TEXT NOT NULL REFERENCES media_deletions(id) ON DELETE CASCADE,\n        ordinal INTEGER NOT NULL,segment TEXT NOT NULL,PRIMARY KEY(job,ordinal),UNIQUE(job,segment));\nCREATE TABLE deletion_plans(job TEXT PRIMARY KEY REFERENCES media_deletions(id) ON DELETE CASCADE,\n        ranges TEXT NOT NULL,cutoff INTEGER NOT NULL,revision INTEGER NOT NULL,cursor_start INTEGER NOT NULL DEFAULT -1,\n        cursor_id TEXT NOT NULL DEFAULT '',ready INTEGER NOT NULL DEFAULT 0,bytes INTEGER NOT NULL DEFAULT 0,liked INTEGER NOT NULL DEFAULT 0);\nCREATE TABLE deletion_ranges(job TEXT NOT NULL REFERENCES media_deletions(id) ON DELETE CASCADE,\n        from_ms INTEGER NOT NULL,to_ms INTEGER NOT NULL,PRIMARY KEY(job,from_ms));\nCREATE TABLE deletion_seeds(job TEXT PRIMARY KEY REFERENCES media_deletions(id) ON DELETE CASCADE,\n        start INTEGER NOT NULL DEFAULT -1,id TEXT NOT NULL DEFAULT '');\nCREATE TABLE deletion_units(job TEXT NOT NULL REFERENCES media_deletions(id) ON DELETE CASCADE,\n        unit TEXT NOT NULL REFERENCES recording_units(id),PRIMARY KEY(job,unit));\nCREATE TABLE event_meta(id INTEGER PRIMARY KEY,latest INTEGER NOT NULL,last_at INTEGER NOT NULL,read_cursor INTEGER NOT NULL,revision INTEGER NOT NULL,event_count INTEGER NOT NULL,run_count INTEGER NOT NULL);\nINSERT INTO \"event_meta\"(\"id\",\"latest\",\"last_at\",\"read_cursor\",\"revision\",\"event_count\",\"run_count\") VALUES(1,0,0,0,0,0,0);\nCREATE TABLE favorite_commands(\n      id TEXT PRIMARY KEY,seq INTEGER NOT NULL UNIQUE,subject TEXT NOT NULL,selection TEXT NOT NULL,\n      liked INTEGER NOT NULL,total INTEGER NOT NULL,processed INTEGER NOT NULL DEFAULT 0,\n      cursor TEXT NOT NULL DEFAULT '',state TEXT NOT NULL DEFAULT 'pending',created INTEGER NOT NULL);\nINSERT INTO \"favorite_commands\"(\"id\",\"seq\",\"subject\",\"selection\",\"liked\",\"total\",\"processed\",\"cursor\",\"state\",\"created\") VALUES('c33f58e3-c75f-4f44-9457-a5f7e0389e31',1,'stripchat:42','cc809711-fb85-4fe2-af8c-c7dd698c452e',1,1,1,'036b824f-055d-403a-a659-5bb64880ead4','completed',1794651189571);\nCREATE TABLE journal_heads (subject TEXT PRIMARY KEY, revision INTEGER NOT NULL);\nINSERT INTO \"journal_heads\"(\"subject\",\"revision\") VALUES('stripchat:42',6);\nCREATE TABLE library_state(id INTEGER PRIMARY KEY CHECK(id=1),library TEXT NOT NULL,sequence INTEGER NOT NULL);\nINSERT INTO \"library_state\"(\"id\",\"library\",\"sequence\") VALUES(1,'6f2fc0f1-f618-4c44-a77c-8ccd3d049fb0',16);\nCREATE TABLE media_deletions(\n      id TEXT PRIMARY KEY,subject TEXT NOT NULL REFERENCES subjects(id),\n      state TEXT NOT NULL,total INTEGER NOT NULL,processed INTEGER NOT NULL DEFAULT 0,\n      reclaimed INTEGER NOT NULL DEFAULT 0,from_ms INTEGER,to_ms INTEGER,\n      created INTEGER NOT NULL,updated INTEGER NOT NULL,error TEXT,retry_at INTEGER NOT NULL DEFAULT 0,\n      attempts INTEGER NOT NULL DEFAULT 0);\nCREATE TABLE media_selections(\n      id TEXT PRIMARY KEY,subject TEXT NOT NULL REFERENCES subjects(id),from_ms INTEGER NOT NULL,\n      to_ms INTEGER NOT NULL,mode TEXT NOT NULL,cutoff INTEGER NOT NULL,personal INTEGER NOT NULL,\n      deletion INTEGER NOT NULL,count INTEGER NOT NULL DEFAULT 0,cursor_start INTEGER NOT NULL DEFAULT -1,\n      cursor_id TEXT NOT NULL DEFAULT '',ready INTEGER NOT NULL DEFAULT 0,created INTEGER NOT NULL,\n      base TEXT,copy_cursor TEXT NOT NULL DEFAULT '',retiring INTEGER NOT NULL DEFAULT 0);\nINSERT INTO \"media_selections\"(\"id\",\"subject\",\"from_ms\",\"to_ms\",\"mode\",\"cutoff\",\"personal\",\"deletion\",\"count\",\"cursor_start\",\"cursor_id\",\"ready\",\"created\",\"base\",\"copy_cursor\",\"retiring\") VALUES('cc809711-fb85-4fe2-af8c-c7dd698c452e','stripchat:42',0,1,'explicit',6,0,0,1,-1,'',1,1794651189547,NULL,'',0);\nCREATE TABLE objects (\n      id TEXT PRIMARY KEY, subject TEXT NOT NULL, filename TEXT NOT NULL,\n      bytes INTEGER NOT NULL, hash TEXT NOT NULL, kind TEXT NOT NULL,\n      deleted INTEGER NOT NULL DEFAULT 0, gc_done INTEGER NOT NULL DEFAULT 0, needs_verify INTEGER NOT NULL DEFAULT 0\n    );\nINSERT INTO \"objects\"(\"id\",\"subject\",\"filename\",\"bytes\",\"hash\",\"kind\",\"deleted\",\"gc_done\",\"needs_verify\") VALUES('036b824f-055d-403a-a659-5bb64880ead4','stripchat:42','1970-01-01/00/seg-036b824f-055d-403a-a659-5bb64880ead4.m4s',3,'e9969bdc67747c3797d62fd1c3e4277269a0945fdb999e8ccc6c7bfb4eeb06bd','fragment',0,0,0);\nINSERT INTO \"objects\"(\"id\",\"subject\",\"filename\",\"bytes\",\"hash\",\"kind\",\"deleted\",\"gc_done\",\"needs_verify\") VALUES('c5124ee5-80aa-4283-92f6-c78c8f230158','stripchat:42','1970-01-01/00/seg-c5124ee5-80aa-4283-92f6-c78c8f230158.m4s',3,'039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81','fragment',0,0,0);\nINSERT INTO \"objects\"(\"id\",\"subject\",\"filename\",\"bytes\",\"hash\",\"kind\",\"deleted\",\"gc_done\",\"needs_verify\") VALUES('b0d02515-bf82-43b3-b22d-65f3cd6a00be','stripchat:42','1970-01-01/00/seg-b0d02515-bf82-43b3-b22d-65f3cd6a00be.m4s',3,'f63893d26c31b9b18b52648ea348b6184f9f02f0c53334e512ea2081c357a371','fragment',0,0,0);\nINSERT INTO \"objects\"(\"id\",\"subject\",\"filename\",\"bytes\",\"hash\",\"kind\",\"deleted\",\"gc_done\",\"needs_verify\") VALUES('629f57e4-8327-4076-9475-b035f9474e68','stripchat:42','1970-01-01/00/seg-629f57e4-8327-4076-9475-b035f9474e68.m4s',3,'7c69b5a30f902560a119a7074f86e3558ca9f94d2933f8f95c47a06e45050f70','fragment',0,0,0);\nINSERT INTO \"objects\"(\"id\",\"subject\",\"filename\",\"bytes\",\"hash\",\"kind\",\"deleted\",\"gc_done\",\"needs_verify\") VALUES('18560baa-0811-4fe8-b45b-a0083a975a78','stripchat:42','1970-01-01/00/seg-18560baa-0811-4fe8-b45b-a0083a975a78.m4s',3,'2be62b34fc3f1526a6a2a978b5c02187c20a9e1f1e7834b34e320cb500f91e64','fragment',0,0,0);\nINSERT INTO \"objects\"(\"id\",\"subject\",\"filename\",\"bytes\",\"hash\",\"kind\",\"deleted\",\"gc_done\",\"needs_verify\") VALUES('91d2d478-b571-4867-97b0-24ca6697912c','stripchat:42','1970-01-01/00/seg-91d2d478-b571-4867-97b0-24ca6697912c.m4s',3,'d26671a9cd866209a63e07e6ab36ba157dc352c675e95181930dd7d5cd21ee9a','fragment',0,0,0);\nCREATE TABLE personal_owner(id INTEGER PRIMARY KEY CHECK(id=1),instance TEXT NOT NULL,user TEXT NOT NULL,revision INTEGER NOT NULL DEFAULT 0);\nINSERT INTO \"personal_owner\"(\"id\",\"instance\",\"user\",\"revision\") VALUES(1,'85900907-2850-477e-8893-6a0814be0748','ca5aa183-6d04-4205-8ea6-d3c716778c1c',1);\nCREATE TABLE program_runs(id TEXT PRIMARY KEY,started INTEGER NOT NULL,heartbeat INTEGER NOT NULL,ended INTEGER,outcome TEXT NOT NULL,detected INTEGER);\nCREATE TABLE recording_units(\n      id TEXT PRIMARY KEY,subject TEXT NOT NULL,start INTEGER NOT NULL,end INTEGER NOT NULL,\n      sample INTEGER NOT NULL,last_start INTEGER NOT NULL,created_revision INTEGER NOT NULL,closed INTEGER NOT NULL DEFAULT 0,deleted INTEGER NOT NULL DEFAULT 0);\nINSERT INTO \"recording_units\"(\"id\",\"subject\",\"start\",\"end\",\"sample\",\"last_start\",\"created_revision\",\"closed\",\"deleted\") VALUES('036b824f-055d-403a-a659-5bb64880ead4','stripchat:42',60000,120000,60000,90000,1,1,0);\nINSERT INTO \"recording_units\"(\"id\",\"subject\",\"start\",\"end\",\"sample\",\"last_start\",\"created_revision\",\"closed\",\"deleted\") VALUES('b0d02515-bf82-43b3-b22d-65f3cd6a00be','stripchat:42',120000,180000,120000,150000,3,1,0);\nINSERT INTO \"recording_units\"(\"id\",\"subject\",\"start\",\"end\",\"sample\",\"last_start\",\"created_revision\",\"closed\",\"deleted\") VALUES('18560baa-0811-4fe8-b45b-a0083a975a78','stripchat:42',180000,240000,180000,210000,5,0,0);\nCREATE TABLE segments (\n      id TEXT PRIMARY KEY, subject TEXT NOT NULL, epoch TEXT NOT NULL, sequence TEXT NOT NULL,\n      media TEXT NOT NULL, init TEXT, start REAL, end REAL,\n      deleted INTEGER NOT NULL DEFAULT 0, json TEXT NOT NULL, created_revision INTEGER NOT NULL DEFAULT 0,\n      UNIQUE(subject,epoch,sequence)\n    );\nINSERT INTO \"segments\"(\"id\",\"subject\",\"epoch\",\"sequence\",\"media\",\"init\",\"start\",\"end\",\"deleted\",\"json\",\"created_revision\") VALUES('036b824f-055d-403a-a659-5bb64880ead4','stripchat:42','migration','0','036b824f-055d-403a-a659-5bb64880ead4',NULL,60000,90000,0,'{\"id\":\"036b824f-055d-403a-a659-5bb64880ead4\",\"subjectId\":\"stripchat:42\",\"sourceEpoch\":\"migration\",\"sourceSequence\":\"0\",\"mediaObjectId\":\"036b824f-055d-403a-a659-5bb64880ead4\",\"initObjectId\":null,\"durationSeconds\":30,\"wallStartMs\":60000,\"wallEndMs\":90000,\"timeBasis\":\"source-pdt\",\"uncertaintyMs\":null,\"discontinuity\":false}',1);\nINSERT INTO \"segments\"(\"id\",\"subject\",\"epoch\",\"sequence\",\"media\",\"init\",\"start\",\"end\",\"deleted\",\"json\",\"created_revision\") VALUES('c5124ee5-80aa-4283-92f6-c78c8f230158','stripchat:42','migration','1','c5124ee5-80aa-4283-92f6-c78c8f230158',NULL,90000,120000,0,'{\"id\":\"c5124ee5-80aa-4283-92f6-c78c8f230158\",\"subjectId\":\"stripchat:42\",\"sourceEpoch\":\"migration\",\"sourceSequence\":\"1\",\"mediaObjectId\":\"c5124ee5-80aa-4283-92f6-c78c8f230158\",\"initObjectId\":null,\"durationSeconds\":30,\"wallStartMs\":90000,\"wallEndMs\":120000,\"timeBasis\":\"source-pdt\",\"uncertaintyMs\":null,\"discontinuity\":false}',2);\nINSERT INTO \"segments\"(\"id\",\"subject\",\"epoch\",\"sequence\",\"media\",\"init\",\"start\",\"end\",\"deleted\",\"json\",\"created_revision\") VALUES('b0d02515-bf82-43b3-b22d-65f3cd6a00be','stripchat:42','migration','2','b0d02515-bf82-43b3-b22d-65f3cd6a00be',NULL,120000,150000,0,'{\"id\":\"b0d02515-bf82-43b3-b22d-65f3cd6a00be\",\"subjectId\":\"stripchat:42\",\"sourceEpoch\":\"migration\",\"sourceSequence\":\"2\",\"mediaObjectId\":\"b0d02515-bf82-43b3-b22d-65f3cd6a00be\",\"initObjectId\":null,\"durationSeconds\":30,\"wallStartMs\":120000,\"wallEndMs\":150000,\"timeBasis\":\"source-pdt\",\"uncertaintyMs\":null,\"discontinuity\":false}',3);\nINSERT INTO \"segments\"(\"id\",\"subject\",\"epoch\",\"sequence\",\"media\",\"init\",\"start\",\"end\",\"deleted\",\"json\",\"created_revision\") VALUES('629f57e4-8327-4076-9475-b035f9474e68','stripchat:42','migration','3','629f57e4-8327-4076-9475-b035f9474e68',NULL,150000,180000,0,'{\"id\":\"629f57e4-8327-4076-9475-b035f9474e68\",\"subjectId\":\"stripchat:42\",\"sourceEpoch\":\"migration\",\"sourceSequence\":\"3\",\"mediaObjectId\":\"629f57e4-8327-4076-9475-b035f9474e68\",\"initObjectId\":null,\"durationSeconds\":30,\"wallStartMs\":150000,\"wallEndMs\":180000,\"timeBasis\":\"source-pdt\",\"uncertaintyMs\":null,\"discontinuity\":false}',4);\nINSERT INTO \"segments\"(\"id\",\"subject\",\"epoch\",\"sequence\",\"media\",\"init\",\"start\",\"end\",\"deleted\",\"json\",\"created_revision\") VALUES('18560baa-0811-4fe8-b45b-a0083a975a78','stripchat:42','migration','4','18560baa-0811-4fe8-b45b-a0083a975a78',NULL,180000,210000,0,'{\"id\":\"18560baa-0811-4fe8-b45b-a0083a975a78\",\"subjectId\":\"stripchat:42\",\"sourceEpoch\":\"migration\",\"sourceSequence\":\"4\",\"mediaObjectId\":\"18560baa-0811-4fe8-b45b-a0083a975a78\",\"initObjectId\":null,\"durationSeconds\":30,\"wallStartMs\":180000,\"wallEndMs\":210000,\"timeBasis\":\"source-pdt\",\"uncertaintyMs\":null,\"discontinuity\":false}',5);\nINSERT INTO \"segments\"(\"id\",\"subject\",\"epoch\",\"sequence\",\"media\",\"init\",\"start\",\"end\",\"deleted\",\"json\",\"created_revision\") VALUES('91d2d478-b571-4867-97b0-24ca6697912c','stripchat:42','migration','5','91d2d478-b571-4867-97b0-24ca6697912c',NULL,210000,240000,0,'{\"id\":\"91d2d478-b571-4867-97b0-24ca6697912c\",\"subjectId\":\"stripchat:42\",\"sourceEpoch\":\"migration\",\"sourceSequence\":\"5\",\"mediaObjectId\":\"91d2d478-b571-4867-97b0-24ca6697912c\",\"initObjectId\":null,\"durationSeconds\":30,\"wallStartMs\":210000,\"wallEndMs\":240000,\"timeBasis\":\"source-pdt\",\"uncertaintyMs\":null,\"discontinuity\":false}',6);\nCREATE TABLE selection_deletion_copies(job TEXT PRIMARY KEY,selection TEXT NOT NULL,\n        cursor TEXT NOT NULL DEFAULT '');\nCREATE TABLE selection_edits(selection TEXT NOT NULL REFERENCES media_selections(id),\n        unit TEXT NOT NULL,include INTEGER NOT NULL,PRIMARY KEY(selection,unit));\nINSERT INTO \"selection_edits\"(\"selection\",\"unit\",\"include\") VALUES('cc809711-fb85-4fe2-af8c-c7dd698c452e','036b824f-055d-403a-a659-5bb64880ead4',1);\nCREATE TABLE selection_pins(selection TEXT NOT NULL REFERENCES media_selections(id),\n        owner TEXT NOT NULL,PRIMARY KEY(selection,owner));\nCREATE TABLE selection_units(selection TEXT NOT NULL REFERENCES media_selections(id) ON DELETE CASCADE,\n        unit TEXT NOT NULL REFERENCES recording_units(id),PRIMARY KEY(selection,unit));\nINSERT INTO \"selection_units\"(\"selection\",\"unit\") VALUES('cc809711-fb85-4fe2-af8c-c7dd698c452e','036b824f-055d-403a-a659-5bb64880ead4');\nCREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);\nINSERT INTO \"settings\"(\"key\",\"value\") VALUES('timeline.deployed-at','1794651188727');\nINSERT INTO \"settings\"(\"key\",\"value\") VALUES('archive.clean','1');\nINSERT INTO \"settings\"(\"key\",\"value\") VALUES('archive.orphan-scan-pending','0');\nCREATE TABLE source_checkpoints(subject TEXT PRIMARY KEY,epoch TEXT NOT NULL,sequence TEXT NOT NULL,wall REAL);\nINSERT INTO \"source_checkpoints\"(\"subject\",\"epoch\",\"sequence\",\"wall\") VALUES('stripchat:42','migration','5',210000);\nCREATE TABLE status_event_states(subject TEXT PRIMARY KEY,status TEXT NOT NULL);\nCREATE TABLE status_heads(subject TEXT PRIMARY KEY,start INTEGER NOT NULL,last_at INTEGER NOT NULL,valid_until INTEGER NOT NULL,status TEXT NOT NULL,active INTEGER NOT NULL,event_expired INTEGER NOT NULL DEFAULT 0);\nCREATE TABLE status_intervals(subject TEXT NOT NULL,start INTEGER NOT NULL,end INTEGER NOT NULL,status TEXT NOT NULL,PRIMARY KEY(subject,start));\nCREATE TABLE subject_images (subject TEXT PRIMARY KEY,preview TEXT NOT NULL);\nCREATE TABLE subject_name_history(subject TEXT NOT NULL REFERENCES subjects(id),handle TEXT NOT NULL,changed_at INTEGER NOT NULL,PRIMARY KEY(subject,handle));\nCREATE TABLE subjects (\n      id TEXT PRIMARY KEY, provider_id INTEGER NOT NULL, handle TEXT NOT NULL,\n      monitor INTEGER NOT NULL DEFAULT 1, auto_record INTEGER NOT NULL DEFAULT 0,\n      status TEXT NOT NULL DEFAULT 'UNKNOWN', observed INTEGER, unlocated INTEGER NOT NULL DEFAULT 0, deletion_revision INTEGER NOT NULL DEFAULT 0\n    );\nINSERT INTO \"subjects\"(\"id\",\"provider_id\",\"handle\",\"monitor\",\"auto_record\",\"status\",\"observed\",\"unlocated\",\"deletion_revision\") VALUES('stripchat:42',42,'Fixture',1,0,'UNKNOWN',NULL,0,0);\nCREATE TABLE unit_favorites(unit TEXT PRIMARY KEY REFERENCES recording_units(id),created INTEGER NOT NULL);\nINSERT INTO \"unit_favorites\"(\"unit\",\"created\") VALUES('036b824f-055d-403a-a659-5bb64880ead4',1794651189571);\nCREATE TABLE unit_index(id INTEGER PRIMARY KEY CHECK(id=1),revision INTEGER NOT NULL,segment TEXT NOT NULL,ready INTEGER NOT NULL);\nINSERT INTO \"unit_index\"(\"id\",\"revision\",\"segment\",\"ready\") VALUES(1,-1,'',1);\nCREATE TABLE unit_segments(segment TEXT PRIMARY KEY REFERENCES segments(id),unit TEXT NOT NULL REFERENCES recording_units(id));\nINSERT INTO \"unit_segments\"(\"segment\",\"unit\") VALUES('036b824f-055d-403a-a659-5bb64880ead4','036b824f-055d-403a-a659-5bb64880ead4');\nINSERT INTO \"unit_segments\"(\"segment\",\"unit\") VALUES('c5124ee5-80aa-4283-92f6-c78c8f230158','036b824f-055d-403a-a659-5bb64880ead4');\nINSERT INTO \"unit_segments\"(\"segment\",\"unit\") VALUES('b0d02515-bf82-43b3-b22d-65f3cd6a00be','b0d02515-bf82-43b3-b22d-65f3cd6a00be');\nINSERT INTO \"unit_segments\"(\"segment\",\"unit\") VALUES('629f57e4-8327-4076-9475-b035f9474e68','b0d02515-bf82-43b3-b22d-65f3cd6a00be');\nINSERT INTO \"unit_segments\"(\"segment\",\"unit\") VALUES('18560baa-0811-4fe8-b45b-a0083a975a78','18560baa-0811-4fe8-b45b-a0083a975a78');\nINSERT INTO \"unit_segments\"(\"segment\",\"unit\") VALUES('91d2d478-b571-4867-97b0-24ca6697912c','18560baa-0811-4fe8-b45b-a0083a975a78');\nUPDATE library_state SET sequence=0;PRAGMA user_version=5;",
+  "privateSql": "CREATE TABLE settings(key TEXT PRIMARY KEY,value TEXT NOT NULL);\nINSERT INTO \"settings\"(\"key\",\"value\") VALUES('archive.cursor-secret','c5da7609c5db52692031ee1870eef36b6c23e40269df6674fa80400e9e8e0345');\nINSERT INTO \"settings\"(\"key\",\"value\") VALUES('fixture.private','preserved');",
+  "files": [
+    {
+      "name": "subjects/stripchat-42/recordings/1970-01-01/00/seg-036b824f-055d-403a-a659-5bb64880ead4.m4s",
+      "base64": "AAID"
+    },
+    {
+      "name": "subjects/stripchat-42/recordings/1970-01-01/00/seg-18560baa-0811-4fe8-b45b-a0083a975a78.m4s",
+      "base64": "BAID"
+    },
+    {
+      "name": "subjects/stripchat-42/recordings/1970-01-01/00/seg-629f57e4-8327-4076-9475-b035f9474e68.m4s",
+      "base64": "AwID"
+    },
+    {
+      "name": "subjects/stripchat-42/recordings/1970-01-01/00/seg-91d2d478-b571-4867-97b0-24ca6697912c.m4s",
+      "base64": "BQID"
+    },
+    {
+      "name": "subjects/stripchat-42/recordings/1970-01-01/00/seg-b0d02515-bf82-43b3-b22d-65f3cd6a00be.m4s",
+      "base64": "AgID"
+    },
+    {
+      "name": "subjects/stripchat-42/recordings/1970-01-01/00/seg-c5124ee5-80aa-4283-92f6-c78c8f230158.m4s",
+      "base64": "AQID"
+    }
+  ],
+  "expected": {
+    "identity": {
+      "instanceId": "85900907-2850-477e-8893-6a0814be0748",
+      "userId": "ca5aa183-6d04-4205-8ea6-d3c716778c1c",
+      "timelineStartMs": 1794651188727
+    },
+    "segments": [
+      {
+        "id": "036b824f-055d-403a-a659-5bb64880ead4",
+        "subjectId": "stripchat:42",
+        "sourceEpoch": "migration",
+        "sourceSequence": "0",
+        "mediaObjectId": "036b824f-055d-403a-a659-5bb64880ead4",
+        "initObjectId": null,
+        "durationSeconds": 30,
+        "wallStartMs": 60000,
+        "wallEndMs": 90000,
+        "timeBasis": "source-pdt",
+        "uncertaintyMs": null,
+        "discontinuity": false
+      },
+      {
+        "id": "c5124ee5-80aa-4283-92f6-c78c8f230158",
+        "subjectId": "stripchat:42",
+        "sourceEpoch": "migration",
+        "sourceSequence": "1",
+        "mediaObjectId": "c5124ee5-80aa-4283-92f6-c78c8f230158",
+        "initObjectId": null,
+        "durationSeconds": 30,
+        "wallStartMs": 90000,
+        "wallEndMs": 120000,
+        "timeBasis": "source-pdt",
+        "uncertaintyMs": null,
+        "discontinuity": false
+      },
+      {
+        "id": "b0d02515-bf82-43b3-b22d-65f3cd6a00be",
+        "subjectId": "stripchat:42",
+        "sourceEpoch": "migration",
+        "sourceSequence": "2",
+        "mediaObjectId": "b0d02515-bf82-43b3-b22d-65f3cd6a00be",
+        "initObjectId": null,
+        "durationSeconds": 30,
+        "wallStartMs": 120000,
+        "wallEndMs": 150000,
+        "timeBasis": "source-pdt",
+        "uncertaintyMs": null,
+        "discontinuity": false
+      },
+      {
+        "id": "629f57e4-8327-4076-9475-b035f9474e68",
+        "subjectId": "stripchat:42",
+        "sourceEpoch": "migration",
+        "sourceSequence": "3",
+        "mediaObjectId": "629f57e4-8327-4076-9475-b035f9474e68",
+        "initObjectId": null,
+        "durationSeconds": 30,
+        "wallStartMs": 150000,
+        "wallEndMs": 180000,
+        "timeBasis": "source-pdt",
+        "uncertaintyMs": null,
+        "discontinuity": false
+      },
+      {
+        "id": "18560baa-0811-4fe8-b45b-a0083a975a78",
+        "subjectId": "stripchat:42",
+        "sourceEpoch": "migration",
+        "sourceSequence": "4",
+        "mediaObjectId": "18560baa-0811-4fe8-b45b-a0083a975a78",
+        "initObjectId": null,
+        "durationSeconds": 30,
+        "wallStartMs": 180000,
+        "wallEndMs": 210000,
+        "timeBasis": "source-pdt",
+        "uncertaintyMs": null,
+        "discontinuity": false
+      },
+      {
+        "id": "91d2d478-b571-4867-97b0-24ca6697912c",
+        "subjectId": "stripchat:42",
+        "sourceEpoch": "migration",
+        "sourceSequence": "5",
+        "mediaObjectId": "91d2d478-b571-4867-97b0-24ca6697912c",
+        "initObjectId": null,
+        "durationSeconds": 30,
+        "wallStartMs": 210000,
+        "wallEndMs": 240000,
+        "timeBasis": "source-pdt",
+        "uncertaintyMs": null,
+        "discontinuity": false
+      }
+    ],
+    "units": [
+      "036b824f-055d-403a-a659-5bb64880ead4",
+      "b0d02515-bf82-43b3-b22d-65f3cd6a00be",
+      "18560baa-0811-4fe8-b45b-a0083a975a78"
+    ]
+  }
+}

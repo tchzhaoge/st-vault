@@ -1,0 +1,122 @@
+.background-tasks {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.background-task-disclosure > summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+.background-task-disclosure > div {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+.background-task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px 20px;
+}
+.background-task {
+  min-width: 0;
+  --task-state-color: var(--muted);
+}
+.background-task.is-running {
+  --task-state-color: var(--accent-hover);
+}
+.background-task.is-retrying,
+.background-task.is-paused {
+  --task-state-color: var(--private);
+}
+.background-task.is-error {
+  --task-state-color: var(--accent-hover);
+}
+.background-task.is-disabled {
+  opacity: 0.65;
+}
+.background-task-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+.background-task-label {
+  font-size: 12px;
+  line-height: 18px;
+  overflow-wrap: anywhere;
+}
+.background-task-state {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+  height: 18px;
+  overflow: hidden;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--task-state-color);
+}
+.background-task-state > i {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  corner-shape: round;
+  background: currentColor;
+}
+.background-task-state .operation-spinner {
+  flex: none;
+  width: 11px;
+  height: 11px;
+}
+.background-task-detail {
+  height: 15px;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.background-task-detail.is-reason {
+  color: var(--task-state-color);
+}
+.background-task-detail:empty {
+  display: none;
+}
+.background-task-state .archive-activity {
+  margin: 0;
+  overflow: hidden;
+  font: inherit;
+  color: inherit;
+}
+.background-task:hover .overflow-text.is-overflowing > span,
+.background-task:focus-within .overflow-text.is-overflowing > span,
+.system-overview .system-stats:hover .overflow-text.is-overflowing > span {
+  animation: history-cell-pan var(--text-duration) linear infinite;
+}
+.system-overview {
+  display: grid;
+  gap: 7px;
+}
+.panel-content .system-overview .system-stats {
+  min-height: 24px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 2px 12px;
+}
+@media (max-width: 600px) {
+  .background-task-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@container (max-width: 440px) {
+  .background-task-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

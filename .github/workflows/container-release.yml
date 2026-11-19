@@ -1,0 +1,133 @@
+name: CI and Docker release
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+env:
+  RELEASE_SERIES: '0.1'
+concurrency:
+  group: main-release
+  queue: max
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Verify anonymous Compose pull of the published image
+        if: ${{ contains(github.event.head_commit.message, '[no release]') }}
+        run: |
+          config="$(mktemp -d)"
+          trap 'rm -f "$config/config.json"; rmdir "$config"' EXIT
+          printf '{"auths":{}}\n' > "$config/config.json"
+          docker --config "$config" compose --progress plain --env-file deploy/.env.example -f deploy/compose.yml pull --policy always app
+      - run: docker build --target qa -t st-vault:qa -f deploy/Dockerfile .
+      - run: docker run --rm st-vault:qa npm run check
+      - run: docker run --rm --entrypoint npm st-vault:qa audit --omit=dev --audit-level=high
+      - run: docker compose -f deploy/compose.yml config --quiet
+  runtime:
+    if: ${{ !contains(github.event.head_commit.message, '[no release]') }}
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    env:
+      STV_IMAGE_ARCH: ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - run: docker build --provenance=false --target runtime --build-arg STV_BUILD_VERSION="$RELEASE_SERIES.$((GITHUB_RUN_NUMBER - 1))" --build-arg STV_BUILD_REVISION="$GITHUB_SHA" --build-arg STV_SOURCE_URL="https://github.com/$GITHUB_REPOSITORY" -t st-vault:runtime -f deploy/Dockerfile .
+      - name: Single-container PostgreSQL startup and shutdown
+        shell: pwsh
+        run: ./tests/deployment/lifecycle.ps1 -Image st-vault:runtime
+      - name: Export the verified runtime image
+        run: node scripts/release-image.mjs export st-vault:runtime "$RUNNER_TEMP/runtime-image"
+      - name: Preserve verified image for publishing
+        uses: actions/upload-artifact@v7
+        with:
+          name: runtime-image-${{ matrix.arch }}
+          overwrite: true
+          path: ${{ runner.temp }}/runtime-image/
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
+  publish:
+    needs: runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Image tags
+        id: image
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          tags="$image:sha-${GITHUB_SHA:0:12},$image:$RELEASE_SERIES.$((GITHUB_RUN_NUMBER - 1))"
+          main_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)"
+          if [[ "$main_sha" == "$GITHUB_SHA" ]]; then
+            tags="$tags,$image:latest"
+          fi
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "tags=$tags" >> "$GITHUB_OUTPUT"
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download verified runtime images
+        uses: actions/download-artifact@v8
+        with:
+          pattern: runtime-image-*
+          path: ${{ runner.temp }}/runtime-images/
+          digest-mismatch: error
+      - name: Publish the tested images under a shared multi-platform tag
+        env:
+          IMAGE: ${{ steps.image.outputs.image }}
+          IMAGE_TAGS: ${{ steps.image.outputs.tags }}
+        run: |
+          sources=()
+          for arch in amd64 arm64; do
+            tag="$IMAGE:build-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$arch"
+            STV_IMAGE_ARCH="$arch" node scripts/release-image.mjs publish "$RUNNER_TEMP/runtime-images/runtime-image-$arch" "$tag"
+            sources+=("$tag")
+          done
+          for tag in ${IMAGE_TAGS//,/ }; do
+            docker buildx imagetools create --tag "$tag" "${sources[@]}"
+            docker buildx imagetools inspect --raw "$tag" | jq -e '
+              [.manifests[].platform | select(.os == "linux") | .architecture]
+              | sort == ["amd64", "arm64"]'
+          done
+      - name: Retire prerelease container versions after the 0.1.0 release
+        if: github.run_number == 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          endpoint="users/${GITHUB_REPOSITORY_OWNER}/packages/container/st-vault"
+          version="$RELEASE_SERIES.0"
+          gh api --paginate --slurp "$endpoint/versions?per_page=100" | jq 'add // []' > "$RUNNER_TEMP/package-versions.json"
+          jq -e --arg version "$version" 'any(.[]; .metadata.container.tags | index($version))' "$RUNNER_TEMP/package-versions.json" >/dev/null
+          jq -r --arg version "$version" --arg commit "sha-${GITHUB_SHA:0:12}" --arg build "build-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-" '
+            .[] | select(all(.metadata.container.tags[];
+              . != $version and . != "latest" and . != $commit and (startswith($build) | not))) | .id
+          ' "$RUNNER_TEMP/package-versions.json" > "$RUNNER_TEMP/obsolete-package-versions"
+          while IFS= read -r id; do
+            gh api --method DELETE "$endpoint/versions/$id"
+            echo "Deleted obsolete container version $id"
+          done < "$RUNNER_TEMP/obsolete-package-versions"

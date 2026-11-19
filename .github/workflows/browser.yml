@@ -1,0 +1,24 @@
+name: Browser regression
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - run: docker build --target qa -t st-vault:qa -f deploy/Dockerfile .
+      - run: docker run --name st-vault-e2e st-vault:qa sh -ec 'npm run build && npm run test:browser'
+      - name: Collect synthetic reports
+        if: always()
+        run: docker cp st-vault-e2e:/work/.local/qa ./qa-artifacts || true
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: synthetic-browser-reports
+          path: qa-artifacts/
+          retention-days: 7

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+  <title id="title">Cookie-Editor → JSON → ST-Vault</title>
+  <desc id="desc">Illustrated guide: log in on the selected website, export that site's cookies as JSON, then paste the complete array into ST-Vault. All values are fictional.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#242124"/><stop offset="1" stop-color="#111113"/></linearGradient>
+    <linearGradient id="panel" x2="0" y2="1"><stop stop-color="#383437"/><stop offset="1" stop-color="#242326"/></linearGradient>
+  </defs>
+  <rect width="1200" height="620" rx="26" fill="url(#bg)"/>
+  <g font-family="Arial, sans-serif" fill="#f6f4f5">
+    <text x="40" y="55" font-size="25" font-weight="700">Cookie-Editor → JSON → ST-Vault</text>
+    <text x="40" y="84" font-size="15" fill="#bab5b8">Same website · Complete JSON array · Keep credentials private</text>
+    <g transform="translate(40 118)">
+      <rect width="346" height="410" rx="18" fill="url(#panel)" stroke="#ffffff24"/>
+      <circle cx="28" cy="30" r="14" fill="#dc5064"/><text x="28" y="35" font-size="16" text-anchor="middle" font-weight="700">1</text>
+      <text x="54" y="36" font-size="19" font-weight="700">Log in on the website</text>
+      <rect x="20" y="62" width="306" height="36" rx="9" fill="#171719"/>
+      <text x="33" y="85" font-size="16">https://stripchat.com</text>
+      <rect x="20" y="116" width="306" height="185" rx="12" fill="#201e21"/>
+      <circle cx="173" cy="165" r="23" fill="#555055"/>
+      <circle cx="173" cy="158" r="8" fill="#c5bfc3"/><path d="M159 178q0-17 14-17t14 17" fill="#c5bfc3"/>
+      <text x="173" y="215" font-size="19" text-anchor="middle">Your signed-in account</text>
+      <text x="173" y="246" font-size="15" text-anchor="middle" fill="#a5dcb0">Complete any verification here</text>
+      <text x="24" y="335" font-size="16">Keep this tab active.</text>
+      <text x="24" y="364" font-size="15" fill="#bab5b8">Use the site selected in ST-Vault.</text>
+    </g>
+    <g transform="translate(427 118)">
+      <rect width="346" height="410" rx="18" fill="url(#panel)" stroke="#ffffff24"/>
+      <circle cx="28" cy="30" r="14" fill="#dc5064"/><text x="28" y="35" font-size="16" text-anchor="middle" font-weight="700">2</text>
+      <text x="54" y="36" font-size="19" font-weight="700">Export → JSON</text>
+      <rect x="20" y="62" width="306" height="240" rx="12" fill="#f5f3f4"/>
+      <text x="38" y="95" font-size="20" fill="#282329" font-weight="700">Cookie-Editor</text>
+      <g fill="#7a7479" font-size="15"><text x="38" y="128">demo_session</text><text x="38" y="155">••••••••••••••••••••</text></g>
+      <rect x="177" y="169" width="128" height="54" rx="8" fill="#ffffff" stroke="#df6475" stroke-width="2"/>
+      <text x="193" y="190" font-size="13" fill="#777">Export As:</text><text x="193" y="212" font-size="17" fill="#bc3a50" font-weight="700">JSON</text>
+      <path d="M20 239h306" stroke="#ddd"/>
+      <g font-size="14" fill="#777" text-anchor="middle"><text x="57" y="275">Add</text><text x="124" y="275">Delete</text><text x="194" y="275">Import</text></g>
+      <rect x="234" y="248" width="80" height="41" rx="8" fill="#dc5064"/><text x="274" y="275" text-anchor="middle" font-size="16" font-weight="700">Export</text>
+      <text x="24" y="335" font-size="16">JSON is copied to your clipboard.</text>
+      <text x="24" y="364" font-size="15" fill="#bab5b8">Do not use Import or Delete.</text>
+    </g>
+    <g transform="translate(814 118)">
+      <rect width="346" height="410" rx="18" fill="url(#panel)" stroke="#ffffff24"/>
+      <circle cx="28" cy="30" r="14" fill="#dc5064"/><text x="28" y="35" font-size="16" text-anchor="middle" font-weight="700">3</text>
+      <text x="54" y="36" font-size="19" font-weight="700">Paste into ST-Vault</text>
+      <text x="24" y="88" font-size="16" font-weight="700">Account · stripchat.com</text>
+      <rect x="20" y="109" width="306" height="161" rx="10" fill="#171719" stroke="#ffffff25"/>
+      <g font-family="monospace" font-size="13"><text x="35" y="137" fill="#ff8c9d">[</text><text x="47" y="163">{ "name": "demo_session",</text><text x="59" y="189">"value": "••••••••",</text><text x="59" y="215">"domain": ".stripchat.com" }</text><text x="35" y="246" fill="#ff8c9d">]</text></g>
+      <rect x="99" y="288" width="227" height="42" rx="10" fill="#dc5064"/><text x="212" y="315" text-anchor="middle" font-size="16" font-weight="700">Connect &amp; sync</text>
+      <text x="24" y="364" font-size="15" fill="#bab5b8">Paste everything, including [ and ].</text>
+    </g>
+    <path d="M395 321h22m-8-7 8 7-8 7M782 321h22m-8-7 8 7-8 7" fill="none" stroke="#ff8798" stroke-width="2.5"/>
+    <text x="40" y="571" font-size="14" fill="#aaa4a8">Illustration, not a live account screenshot. Extension appearance may vary. Example values cannot sign in.</text>
+  </g>
+</svg>

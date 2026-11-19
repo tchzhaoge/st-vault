@@ -1,0 +1,31 @@
+{
+  "name": "@st-vault/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node ../../build/apps/server/src/index.js",
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --configLoader native",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@st-vault/api-schema": "*",
+    "fastify": "^5.2.0",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=24.22.1"
+  },
+  "license": "Apache-2.0"
+}
